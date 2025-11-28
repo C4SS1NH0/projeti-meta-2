@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Ship } from "lucide-react";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function RegisterLoginForm() {
   const pathname = usePathname();
+  const router = useRouter();
   const { login, register, isAuthenticated } = useAuth();
   const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -401,7 +402,7 @@ export default function RegisterLoginForm() {
 
               <div className="mt-4 text-center">
                 <button
-                  onClick={toggleMode}
+                  onClick={() => router.push(isLogin ? "/register" : "/login")}
                   type="button"
                   className="text-sm text-gray-600 font-[family-name:var(--font-nunito-sans)] hover:text-[#0ea5e9] transition-all duration-300"
                 >

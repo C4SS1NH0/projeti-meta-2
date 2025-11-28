@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Menu, Ship, LucideIcon, CreditCard, MessageCircle, User, LogOut } from "lucide-react";
+import { Menu, Ship, LucideIcon, CreditCard, MessageCircle, User, LogOut, ChevronDown, Mail, UserCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import {
@@ -149,31 +149,116 @@ interface AuthButtonsProps {
 
 const AuthButtons = ({ isMobile = false, onClose }: AuthButtonsProps) => {
   const { user, isAuthenticated, logout } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const getRoleName = (role: string) => {
+    const roles: Record<string, string> = {
+      ADMIN: "Administrador",
+      OPERADOR: "Operador",
+      CLIENTE: "Cliente",
+    };
+    return roles[role] || role;
+  };
 
   if (isAuthenticated && user) {
-    return (
-      <div className={isMobile ? "space-y-3" : "flex items-center gap-3"}>
-        <div className={isMobile ? "flex flex-col gap-2" : "flex items-center gap-2"}>
-          <div className={isMobile ? "flex items-center gap-2 text-white py-2" : "flex items-center gap-2 text-white"}>
-            <User className="h-5 w-5" />
-            <span className="font-[family-name:var(--font-montserrat)] font-medium text-sm">
-              {user.name.split(" ")[0]}
-            </span>
+    if (isMobile) {
+      return (
+        <div className="space-y-4">
+          <div className="bg-white/10 rounded-lg p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-[#0ea5e9] rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <p className="text-white font-semibold">{user.name}</p>
+                <p className="text-white/70 text-sm">{user.email}</p>
+              </div>
+            </div>
+            <div className="text-white/60 text-xs">
+              Conta: {getRoleName(user.role)}
+            </div>
           </div>
           <Button
             size="lg"
-            className={isMobile
-              ? "w-full bg-red-500/80 text-white hover:bg-red-600 font-[family-name:var(--font-montserrat)] font-bold"
-              : "bg-white/10 text-white hover:bg-red-500 font-[family-name:var(--font-montserrat)] font-bold rounded-full px-4 shadow-lg transition-colors"}
+            className="w-full bg-red-500/80 text-white hover:bg-red-600 font-[family-name:var(--font-montserrat)] font-bold"
             onClick={() => {
               logout();
               onClose?.();
             }}
           >
-            <LogOut className="h-4 w-4 mr-1" />
-            Sair
+            <LogOut className="h-4 w-4 mr-2" />
+            Sair da conta
           </Button>
         </div>
+      );
+    }
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-full transition-colors"
+        >
+          <div className="w-8 h-8 bg-[#0ea5e9] rounded-full flex items-center justify-center">
+            <span className="text-white font-bold text-sm">
+              {user.name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+          <span className="font-[family-name:var(--font-montserrat)] font-medium text-sm hidden sm:block">
+            {user.name.split(" ")[0]}
+          </span>
+          <ChevronDown className={`h-4 w-4 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+        </button>
+
+        {isDropdownOpen && (
+          <>
+            <div 
+              className="fixed inset-0 z-40" 
+              onClick={() => setIsDropdownOpen(false)}
+            />
+            <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+              <div className="p-4 bg-gradient-to-r from-[#0284c7] to-[#0ea5e9]">
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold text-xl">
+                      {user.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold">{user.name}</p>
+                    <p className="text-white/80 text-sm">{getRoleName(user.role)}</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-3">
+                <div className="flex items-center gap-3 px-3 py-2 text-gray-600">
+                  <Mail className="h-4 w-4" />
+                  <span className="text-sm">{user.email}</span>
+                </div>
+                <div className="flex items-center gap-3 px-3 py-2 text-gray-600">
+                  <UserCircle className="h-4 w-4" />
+                  <span className="text-sm">Tipo: {getRoleName(user.role)}</span>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-100 p-2">
+                <button
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    logout();
+                  }}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="font-medium">Sair da conta</span>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   }
